@@ -1,0 +1,15 @@
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine deploy target
+        id: vars
+        run: |
+          if [[ "${GITHUB_REF#refs/tags/}" == *-* ]]; then # checking if it's a prerelease tag version which contains hyphen '-'
+            echo "hook_url=${{ secrets.VERCEL_DEPLOY_HOOK_DEVELOPMENT }}" >> $GITHUB_OUTPUT
+          else
+            echo "hook_url=${{ secrets.VERCEL_DEPLOY_HOOK_MAIN }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger Vercel deploy
+        run: curl -X POST "${{ steps.vars.outputs.hook_url }}"
